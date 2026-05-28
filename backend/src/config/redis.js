@@ -1,5 +1,5 @@
 import { Redis as UpstashRedis } from '@upstash/redis'
-import { createClient as createLocalClient } from 'redis'
+import { createClient } from 'redis'
 
 let redisInstance = null
 let connectionPromise = null // Track the active connection process
@@ -16,13 +16,10 @@ export const initRedis = async () => {
   // 3. Create the connection promise
   connectionPromise = (async () => {
     if (process.env.NODE_ENV === 'production') {
-      redisInstance = new UpstashRedis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN,
-      })
-      console.log('☁️ Production Upstash Redis initialized')
+      redisInstance =  await createClient({ url: process.env.REDIS_URL }).connect()
+      console.log('☁️ Production Redis initialized')
     } else {
-      const client = createLocalClient({
+      const client = createClient({
         url: 'redis://127.0.0.1:6380'
       })
 
