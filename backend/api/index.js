@@ -1,16 +1,12 @@
-import dotenv from 'dotenv'
 import express from 'express'
-import http from 'http'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import { Redis } from '@upstash/redis'
+import { initRedis, getRedis } from '../src/config/redis.js'
 
-dotenv.config()
-const PORT = process.env.PORT || 8002
 const app = express()
 
+// Dynamic CORS Configuration
 const allowedOrigins = process.env.corsOrigin ? [process.env.corsOrigin] : ['http://localhost:3000']
-
 const corsOptions = {
     origin: allowedOrigins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -18,20 +14,20 @@ const corsOptions = {
     credentials: true
 }
 
+// Middlewares
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
-// Upstash Redis (REST API - safe for serverless)
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN,
-})
+// Immediate async initialization for Serverless environments
+initRedis().catch(err => console.error('Failed to pre-init Redis:', err))
 
+// API Routes
 app.post('/api/set', async (req, res) => {
   try {
     const { key, value } = req.body
+    const redis = getRedis()
     await redis.set(key, value)
     res.json({ success: true, message: 'Stored successfully' })
   } catch (err) {
@@ -42,6 +38,7 @@ app.post('/api/set', async (req, res) => {
 app.get('/api/get', async (req, res) => {
   try {
     const { key } = req.query
+    const redis = getRedis()
     const value = await redis.get(key)
     res.json({ success: true, value })
   } catch (err) {
@@ -50,13 +47,5 @@ app.get('/api/get', async (req, res) => {
 })
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }))
-
-
-// Local dev fallback
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`)
-  })
-}
 
 export default app
