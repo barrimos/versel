@@ -50,3 +50,6 @@ export const getRedis = async () => {
 
   return globalRedisClient
 }
+
+const containerId = Math.random().toString(36).substring(7)
+console.log(`[🚀 CONTAINER CREATED] New Instance Spawned! ID: ${containerId} at ${new Date().toISOString()}`)
