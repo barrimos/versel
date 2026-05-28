@@ -4,6 +4,7 @@ import { initRedis } from './config/redis.js'
 
 dotenv.config()
 const PORT = process.env.PORT || 8002
+let isRedisConnected = false
 
 const startLocalServer = async () => {
   try {
@@ -14,7 +15,11 @@ const startLocalServer = async () => {
 
     // 2. Connect to Redis concurrently without blocking port allocation
     console.log('🔄 Connecting to storage layers...')
-    await initRedis()
+    const connectRedisOnce = async () => {
+      if (isRedisConnected) return
+      await initRedis()
+      isRedisConnected = true
+    }
     
   } catch (error) {
     console.error('💥 Critical error spinning up development runtime:', error)
