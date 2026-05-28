@@ -20,9 +20,6 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
-// Immediate async initialization for Serverless environments
-initRedis().catch(err => console.error('Failed to pre-init Redis:', err))
-
 // API Routes
 app.post('/api/set', async (req, res) => {
   try {
