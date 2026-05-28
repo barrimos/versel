@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import { initRedis, getRedis } from '../src/config/redis.js'
+import { getRedis } from '../src/config/redis.js'
 
 const app = express()
 
@@ -27,7 +27,7 @@ initRedis().catch(err => console.error('Failed to pre-init Redis:', err))
 app.post('/api/set', async (req, res) => {
   try {
     const { key, value } = req.body
-    const redis = getRedis()
+    const redis = await getRedis()
     await redis.set(key, value)
     res.json({ success: true, message: 'Stored successfully' })
   } catch (err) {
@@ -38,7 +38,7 @@ app.post('/api/set', async (req, res) => {
 app.get('/api/get', async (req, res) => {
   try {
     const { key } = req.query
-    const redis = getRedis()
+    const redis = await getRedis()
     const value = await redis.get(key)
     res.json({ success: true, value })
   } catch (err) {

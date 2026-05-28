@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
 import app from '../api/index.js'
-import { initRedis } from './config/redis.js'
+import { getRedis } from './config/redis.js'
 
 dotenv.config()
 const PORT = process.env.PORT || 8002
@@ -17,7 +17,7 @@ const startLocalServer = async () => {
     console.log('🔄 Connecting to storage layers...')
     const connectRedisOnce = async () => {
       if (isRedisConnected) return
-      await initRedis()
+      await getRedis()
       isRedisConnected = true
     }
     
